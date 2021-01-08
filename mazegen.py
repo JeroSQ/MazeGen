@@ -91,7 +91,7 @@ class Maze():
                 continue
             self.maze[coords[0]][coords[1]] = True
             self.count += 1
-            print(self.count)
+            #print(self.count)
             neighbors = self.__get_unvisited_neighbors(coords, node)
             self.__draw_cell(node)
             if neighbors:
