@@ -1,7 +1,7 @@
 import mazegen
 import exporter
 
-maze = mazegen.Maze(height=20, width=20) 
+maze = mazegen.Maze(height=20, width=100) 
 maze.generate()
 exporter.export_txt(maze)
 exporter.export_png(maze, cell_size=5)

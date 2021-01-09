@@ -46,7 +46,6 @@ class Maze():
             for col in range((self.width * 2) - 1):
                 self.maze_export[row].append(False)
         
-    
     def __get_unvisited_neighbors(self, coords, node):
         def is_valid(self, coords):
             row, col = coords

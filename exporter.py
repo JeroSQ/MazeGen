@@ -24,7 +24,7 @@ def export_png(maze, cell_size=5, cell_border=0):
     for i in range(height):
         for j in range(width):
             if maze.maze_export[i][j]:
-                draw.rectangle([i * cell_size + cell_border, j * cell_size + cell_border, (i+1) * cell_size - cell_border, (j+1) * cell_size - cell_border],fill="white")
+                draw.rectangle([j * cell_size + cell_border, i * cell_size + cell_border, (j+1) * cell_size - cell_border, (i+1) * cell_size - cell_border],fill="white")
 
     img.save("maze.png")
 
@@ -42,7 +42,7 @@ def export_gif(maze, cell_size=5, cell_border=0, duration=20):
     draw = ImageDraw.Draw(img)
 
     for i, j in maze.order:
-        draw.rectangle([i * cell_size + cell_border, j * cell_size + cell_border, (i+1) * cell_size - cell_border, (j+1) * cell_size - cell_border],fill="white")
+        draw.rectangle([j * cell_size + cell_border, i * cell_size + cell_border, (j+1) * cell_size - cell_border, (i+1) * cell_size - cell_border],fill="white")
         frames.append(Image.frombytes(img.mode, img.size, img.tobytes()))
 
     frames[0].save('maze.gif', save_all=True, append_images=frames[1:], duration=duration)
