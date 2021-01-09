@@ -16,5 +16,5 @@ To generate your random maze, simply call generate() on your maze object.
 exporter.py functions:
 
 export_txt(maze) -> exports the maze passed as a .txt file where hashes(#) are the possible paths and whitespaces are walls
-export_img(maze, cell_size=5) -> exports the maze passed as a .png file where white is the possible paths and black is the walls
-export_gif(maze, cell_size=5, duration=20) -> exports the maze passed as a .gif file showing the process of generating the maze
+export_img(maze, cell_size=5, cell_border=0) -> exports the maze passed as a .png file where white is the possible paths and black is the walls
+export_gif(maze, cell_size=5, cell_border=0, duration=20) -> exports the maze passed as a .gif file showing the process of generating the maze
