@@ -2,7 +2,7 @@ import mazegen
 import exporter
 
 maze = mazegen.Maze(height=50, width=50) 
-maze.generate()
+maze.generateDFS()
 exporter.export_txt(maze.maze_export)
 exporter.export_png(maze.maze_export)
 # WARNING - Creating a GIF of a big maze and/or big cell_size can lead to Memory Error or even crash your PC

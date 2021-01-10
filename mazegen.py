@@ -80,7 +80,7 @@ class Maze():
         self.order.append((export_coords[0], export_coords[1]))
         self.order.append((row * 2, col * 2))
 
-    def generate(self):
+    def generateDFS(self):
         visited = Stack()
         visited.add(Node(state=(int(self.height / 2), int(self.width / 2)), parent=None, action=None))
         self.count = 0
@@ -100,3 +100,7 @@ class Maze():
                 copy_n.remove(r)
                 visited.extend(copy_n)
                 visited.add(r)
+
+    def generateHuntKill(self):
+        visited = Stack()
+        
