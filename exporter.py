@@ -1,19 +1,27 @@
 from PIL import Image, ImageDraw
 
 def export_txt(maze):
-    "Exports the maze passed as a .txt file where hashes(#) are the possible paths and whitespaces are walls"
+    """Exports the maze passed as a .txt file where hashes(#) are the possible paths and whitespaces are walls"""
+    height = maze.height * 2 - 1
+    width = maze.width * 2 - 1
+    txt_maze = [
+        [False for _ in range(width)]
+        for _ in range(height)
+    ]
+    for node in maze.maze:
+        action_coords = get_action_coords(node)
+        txt_maze[node.state[0]*2][node.state[1]*2] = True
+        txt_maze[action_coords[0]][action_coords[1]] = True
     with open("maze.txt", "w") as f:
-        height = len(maze.maze_export)
-        width = max(len(row) for row in maze.maze_export)
         for i in range(height):
             for j in range(width):
-                f.write(" " if maze.maze_export[i][j] else "#")
+                f.write("#" if txt_maze[i][j] else " ")
             f.write("\n")
 
 def export_png(maze, cell_size=5, cell_border=0, color=False):
-    "Exports the maze passed as a .png file where white is the possible paths and black is the walls"
-    height = len(maze.maze_export)
-    width = max(len(row) for row in maze.maze_export)
+    """Exports the maze passed as a .png file where white is the possible paths and black is the walls"""
+    height = maze.height * 2 - 1
+    width = maze.width * 2 - 1
     img = Image.new(
         "RGBA",
         (width * cell_size, height  * cell_size),
@@ -21,17 +29,23 @@ def export_png(maze, cell_size=5, cell_border=0, color=False):
     )
     draw = ImageDraw.Draw(img)
 
-    for (i, j), lenpath in maze.order.items():
+    for node, lenpath in maze.maze.items():
+        row, col = node.state
+        a_row, a_col = get_action_coords(node)
         draw.rectangle(
-            [j * cell_size + cell_border, i * cell_size + cell_border, (j+1) * cell_size - cell_border, (i+1) * cell_size - cell_border],
-            fill=get_color(height, width, color, lenpath, maze.random))
+            [a_col * cell_size + cell_border, a_row * cell_size + cell_border, (a_col+1) * cell_size - cell_border, (a_row+1) * cell_size - cell_border],
+            fill=get_color(height, width, color, lenpath - 1 if lenpath > 0 else 0, maze))
+
+        draw.rectangle(
+            [col * 2 * cell_size + cell_border, row * 2 * cell_size + cell_border, (col*2+1) * cell_size - cell_border, (row*2+1) * cell_size - cell_border],
+            fill=get_color(height, width, color, lenpath, maze))
 
     img.save("maze.png")
 
 def export_gif(maze, cell_size=5, cell_border=0, duration=20, color=False):
-    "Exports the maze passed as a .gif file showing the process of generating the maze"
-    height = len(maze.maze_export)
-    width = max(len(row) for row in maze.maze_export)
+    """Exports the maze passed as a .gif file showing the process of generating the maze"""
+    height = maze.height * 2 - 1
+    width = maze.width * 2 - 1
     frames = []
     img = Image.new(
         "RGBA",
@@ -41,25 +55,29 @@ def export_gif(maze, cell_size=5, cell_border=0, duration=20, color=False):
 
     draw = ImageDraw.Draw(img)
 
-    for (i, j), lenpath in maze.order.items():
+    for node, lenpath in maze.maze.items():
+        row, col = node.state
+        a_row, a_col = get_action_coords(node)
         draw.rectangle(
-            [j * cell_size + cell_border, i * cell_size + cell_border, (j+1) * cell_size - cell_border, (i+1) * cell_size - cell_border],
-            fill=get_color(height, width, color, lenpath, maze.random))
+            [a_col * cell_size + cell_border, a_row * cell_size + cell_border, (a_col+1) * cell_size - cell_border, (a_row+1) * cell_size - cell_border],
+            fill=get_color(height, width, color, lenpath - 1 if lenpath > 0 else 0, maze))
+        frames.append(Image.frombytes(img.mode, img.size, img.tobytes()))
+
+        draw.rectangle(
+            [col * 2 * cell_size + cell_border, row * 2 * cell_size + cell_border, (col*2+1) * cell_size - cell_border, (row*2+1) * cell_size - cell_border],
+            fill=get_color(height, width, color, lenpath, maze))
         frames.append(Image.frombytes(img.mode, img.size, img.tobytes()))
 
     frames[0].save('maze.gif', save_all=True, append_images=frames[1:], duration=duration)
 
-def get_color(height, width, color, path_length, random):
-    "Returns a color for each path_length value"
+def get_color(height, width, color, path_length, maze):
+    """Returns a color for each path_length value"""
     if not color:
         return "white"
 
-    # Calculate approximate longest possible path
-    longest_path = int((height * width) / 10) + max([height, width]) * 2 if random else (height * width) / 4
-
     start_color = [0, 255, 255]
 
-    start_color[1] -= int(path_length * 1530 / longest_path)
+    start_color[1] -= int(path_length * 1530 / (maze.longest_path + min([height, width])))
 
     if start_color[1] < 0:
         start_color[0] += abs(start_color[1])
@@ -78,4 +96,20 @@ def get_color(height, width, color, path_length, random):
 
     return tuple(start_color)
 
+def get_action_coords(node):
+    row, col = node.state
+    action = node.action
+    action_coords = [row * 2, col * 2]
+
+    if action == "up":
+        action_coords[0] = row * 2 + 1
+    elif action == "down":
+        action_coords[0] = row * 2 - 1
+    elif action == "right":
+        action_coords[1] = col * 2 - 1
+    elif action == "left":
+        action_coords[1] = col * 2 + 1
+
+    return tuple(action_coords)
+    
 

@@ -11,7 +11,15 @@ How to Use
 ----------
 
 Using the mazegen.Maze() consctructor, create your maze with your desired height and width as keyword arguments.
-To generate your random maze, simply call generate() on your maze object.
+To generate your random maze, simply call generate() on your maze object passing as an argument the method you'd like to use.
+Supported methods are:
+
+-DFS(recursive back-tracker)
+-Hunt and Kill
+
+To select a method use this notation: 
+your_maze_object.method 
+where your_maze_object is the object you created with mazegen.Maze() and the method is DFS or HUNTKILL
 
 exporter.py functions:
 
