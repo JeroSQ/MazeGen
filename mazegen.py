@@ -1,4 +1,5 @@
 import random
+from collections import OrderedDict
 
 class Node():
     def __init__(self, state, parent, action):
@@ -25,9 +26,16 @@ class Stack():
         return len(self.frontier) == 0
 
 class Maze():
+    
+    DFS = 0
+    HUNTKILL = 1
+    ELLERS = 2
+
     def __init__(self, height, width, root="top-left", random=True):
-        if height < 3 or width < 3:
-            raise Exception("Maze too small")
+      #  if height < 3 or width < 3:
+       #     raise Exception("Maze too small")
+        self.orig_height = height
+        self.orig_width = width
         self.height = round((height + 1) / 2)
         self.width = round((width + 1) / 2)
         self.maze = {}
@@ -44,8 +52,6 @@ class Maze():
             start[0] = int(self.height / 2)
             start[1] = int(self.width / 2)
         self.start = start
-        self.DFS = 0
-        self.HUNTKILL = 1
         
     def __get_neighbors(self, node, get_unvisited=True, opposite_action=False):
         def is_valid(self, node):
@@ -68,11 +74,14 @@ class Maze():
             self.__generateDFS_HUNT(HUNT=False)
         elif method == self.HUNTKILL:
             self.__generateDFS_HUNT(HUNT=True)
+        elif method == self.ELLERS:
+            self.__generateELLERS()
         else:
             raise Exception("Wrong Method")
         self.method = method
         self.longest_path = max(l for l in self.maze.values())
-        print(f"Furthest away cell from root is {self.longest_path} cells away")
+        if method != self.ELLERS:
+            print(f"Furthest away cell from root is {self.longest_path} cells away")
     
     def __generateDFS_HUNT(self, HUNT):
         visited = Stack()
@@ -95,7 +104,84 @@ class Maze():
                         if neighs:
                             visited.add(Node(state=(row, col), parent=[n for n in self.maze.keys() if n.state == neighs[len(neighs) - 1].state][0], action=neighs[len(neighs) - 1].action))
                             hunt_row = row
-                            break             
+                            break
+
+    def __generateELLERS(self):
+        row_sets = dict()
+        for row in range(self.height):
+            new = []
+            cells = [i for j in row_sets.values() for i in j if i[0] == row]
+            cells.sort(key=lambda x:x[0])
+            for cell in range(self.width):
+                # If cell isn't in a set
+                if (row, cell) not in cells:
+                    new_set = max(i for i in row_sets.keys()) + 1 if row_sets else cell
+                    row_sets[new_set] = []
+                    row_sets[new_set].append((row, cell))
+                    new.append((row, cell))
+                    self.maze[Node(state=(row, cell), parent=None, action=None)] = row
+                
+            # Union sets
+            cells = [i for j in row_sets.values() for i in j if i[0] == row]
+            cells.sort(key=lambda x:x[0])
+            for cell in cells:
+                if cell[1]+1 == self.width:
+                    continue
+
+                s1 = [s for s in row_sets.keys() if row_sets[s] != 0 and cell in row_sets[s]][0]
+                s2 = [s for s in row_sets.keys() if row_sets[s] != 0 and (cell[0], cell[1]+1) in row_sets[s]][0]
+                if random.random() < 0.5 or s1 == s2:
+                    continue
+                else:
+                    row_sets[s1].extend(row_sets[s2])
+                    row_sets[s2] = 0
+                    self.maze[Node(state=(cell[0], cell[1]+1), parent=None, action="right")] = row
+            
+            # Modify dict
+            for key in list(row_sets.keys()):
+                if not row_sets[key]:
+                    row_sets.pop(key)
+
+            if row == self.height - 1:
+                continue
+
+            # Add bottom cells
+            for s in list(row_sets.keys()):
+
+                # At least one down-passage per set
+                to_choose = [i for i in row_sets[s] if i[0] == row and (i[0]+1, i[1]) not in [i.state for i in self.maze.keys()]]
+                r_cell = random.choice(to_choose)
+                to_choose.remove(r_cell)
+                row_sets[s].append((r_cell[0] + 1, r_cell[1]))
+                self.maze[Node(state=(r_cell[0] + 1, r_cell[1]), parent=None, action="down")] = row
+
+                # Other random down-passages
+                for c in to_choose:
+                    if random.random() < 0.5 and (c[0] + 1, c[1]) not in [i.state for i in self.maze.keys()]:
+                        row_sets[s].append((c[0] + 1, c[1]))
+                        self.maze[Node(state=row_sets[s][-1], parent=None, action="down")] = row
+                        row_sets[s] = list(OrderedDict.fromkeys(row_sets[s]))
+
+            # Forget previous rows
+            for s in row_sets.keys():
+                for c in row_sets[s]:
+                    if c[0] <= row - 1 and row != 0:
+                        row_sets[s].remove(c)
+        
+        # All last-row cells must belong to the same set
+        cells = [i for j in row_sets.values() for i in j if i[0] == self.height - 1]
+        cells.sort(key=lambda x:x[0])
+        for cell in cells:
+            if cell[1]+1 == self.width:
+                continue
+
+            s1 = [s for s in row_sets.keys() if row_sets[s] != 0 and cell in row_sets[s]][0]
+            s2 = [s for s in row_sets.keys() if row_sets[s] != 0 and (cell[0], cell[1]+1) in row_sets[s]][0]
+
+            if s1 != s2:
+                row_sets[s1].extend(row_sets[s2])
+                row_sets[s2] = 0
+                self.maze[Node(state=(cell[0], cell[1]+1), parent=None, action="right")] = self.height - 1
 
     def get_path_length(self, node):
         count = 0

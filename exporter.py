@@ -3,7 +3,7 @@ from PIL import Image, ImageDraw
 def export_txt(maze):
     """Exports the maze passed as a .txt file where hashes(#) are the possible paths and whitespaces are walls"""
     height = maze.height * 2 - 1
-    width = maze.width * 2 - 1
+    width = maze.width * 2 - 1 
     txt_maze = [
         [False for _ in range(width)]
         for _ in range(height)
@@ -20,8 +20,8 @@ def export_txt(maze):
 
 def export_png(maze, cell_size=5, cell_border=0, color=False):
     """Exports the maze passed as a .png file where white is the possible paths and black is the walls"""
-    height = maze.height * 2 - 1
-    width = maze.width * 2 - 1
+    height = maze.height * 2 - 1 
+    width = maze.width * 2 - 1 
     img = Image.new(
         "RGBA",
         (width * cell_size, height  * cell_size),
@@ -44,7 +44,7 @@ def export_png(maze, cell_size=5, cell_border=0, color=False):
 
 def export_gif(maze, cell_size=5, cell_border=0, duration=20, color=False):
     """Exports the maze passed as a .gif file showing the process of generating the maze"""
-    height = maze.height * 2 - 1
+    height = maze.height * 2 - 1 
     width = maze.width * 2 - 1
     frames = []
     img = Image.new(
