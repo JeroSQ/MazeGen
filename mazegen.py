@@ -29,6 +29,7 @@ class Maze():
     HUNTKILL = 1
     ELLERS = 2
     PRIMS = 3
+    KRUSKALS = 4
 
     def __init__(self, height, width, root="top-left", random=True):
       #  if height < 3 or width < 3:
@@ -77,11 +78,13 @@ class Maze():
             self.__generateELLERS()
         elif method == self.PRIMS:
             self.__generatePRIMS()
+        elif method == self.KRUSKALS:
+            self.__generateKRUSKALS()
         else:
             raise Exception("Wrong Method")
         self.method = method
         self.longest_path = max(l for l in self.maze.values())
-        if method != self.ELLERS:
+        if method != self.ELLERS and method != self.KRUSKALS:
             print(f"Furthest away cell from root is {self.longest_path} cells away")
     
     def __generateDFS_HUNT(self, HUNT):
@@ -188,12 +191,48 @@ class Maze():
         start = (random.randrange(0, self.height), random.randrange(0, self.width))
         node = Node(state=start, parent=None, action=None)
         self.maze[node] = 0
-        wall_list = self.__get_neighbors(node)
+        neigh_list = self.__get_neighbors(node)
+        while neigh_list:
+            neigh = random.choice(neigh_list)
+            if not [j for j in self.maze.keys() if j.state == neigh.state]:
+                self.maze[neigh] = self.get_path_length(neigh)
+                neigh_list.extend(self.__get_neighbors(neigh))
+            neigh_list.remove(neigh)
+
+    def __generateKRUSKALS(self):
+        wall_list = []
+
+        for row in range(self.height):
+            for col in range(self.width):
+                if col < self.width - 1:
+                    wall_list.append((
+                            Node(state=(row, col), parent=None, action=None),
+                            Node(state=(row, col + 1), parent=None, action="right")
+                    ))
+                if row < self.height - 1:
+                    wall_list.append((
+                                Node(state=(row, col), parent=None, action=None),
+                                Node(state=(row + 1, col), parent=None, action="down")
+                        ))
+        
+        sets = {i:set([cell]) for i, cell in enumerate(self.get_all_coords())}
+
         while wall_list:
             wall = random.choice(wall_list)
-            if not [j for j in self.maze.keys() if j.state == wall.state]:
-                self.maze[wall] = self.get_path_length(wall)
-                wall_list.extend(self.__get_neighbors(wall))
+
+            cell1 = wall[0]
+            cell2 = wall[1]
+            set_cell_1 = [i for i in sets.keys() if cell1.state in sets[i]][0]
+            set_cell_2 = [i for i in sets.keys() if cell2.state in sets[i]][0]
+
+            if set_cell_1 != set_cell_2:
+                self.maze[cell1] = 0
+                self.maze[cell2] = 0
+                for cell in sets[set_cell_2]:
+                    sets[set_cell_1].add(cell)
+
+                sets.pop(set_cell_2)
+            
             wall_list.remove(wall)
 
     def get_path_length(self, node):
@@ -205,7 +244,7 @@ class Maze():
 
     def get_all_coords(self, start_row=0):
         coords = []
-        for i in range(start_row, self.height - 1):
-            for j in range(self.width - 1):
+        for i in range(start_row, self.height):
+            for j in range(self.width):
                 coords.append((i, j))
         return coords

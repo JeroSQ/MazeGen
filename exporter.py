@@ -8,7 +8,7 @@ def export_txt(maze):
         [False for _ in range(width)]
         for _ in range(height)
     ]
-    for node in maze.maze:
+    for node in maze.maze: 
         action_coords = get_action_coords(node)
         txt_maze[node.state[0]*2][node.state[1]*2] = True
         txt_maze[action_coords[0]][action_coords[1]] = True
@@ -55,18 +55,26 @@ def export_gif(maze, cell_size=5, cell_border=0, duration=20, color=False):
 
     draw = ImageDraw.Draw(img)
 
+    count = 1
     for node, lenpath in maze.maze.items():
         row, col = node.state
         a_row, a_col = get_action_coords(node)
         draw.rectangle(
             [a_col * cell_size + cell_border, a_row * cell_size + cell_border, (a_col+1) * cell_size - cell_border, (a_row+1) * cell_size - cell_border],
             fill=get_color(height, width, color, lenpath - 1 if lenpath > 0 else 0, maze))
-        frames.append(Image.frombytes(img.mode, img.size, img.tobytes()))
+        if maze.method != maze.KRUSKALS:
+            frames.append(Image.frombytes(img.mode, img.size, img.tobytes()))
 
         draw.rectangle(
             [col * 2 * cell_size + cell_border, row * 2 * cell_size + cell_border, (col*2+1) * cell_size - cell_border, (row*2+1) * cell_size - cell_border],
             fill=get_color(height, width, color, lenpath, maze))
-        frames.append(Image.frombytes(img.mode, img.size, img.tobytes()))
+        if maze.method == maze.KRUSKALS:
+            if count == 2:
+                frames.append(Image.frombytes(img.mode, img.size, img.tobytes()))
+                count = 0
+            count += 1
+        else:
+            frames.append(Image.frombytes(img.mode, img.size, img.tobytes()))
 
     frames[0].save('maze.gif', save_all=True, append_images=frames[1:], duration=duration)
 
