@@ -30,6 +30,7 @@ class Maze():
     ELLERS = 2
     PRIMS = 3
     KRUSKALS = 4
+    ALDOUSBRODER = 5
 
     def __init__(self, height, width, root="top-left", random=True):
       #  if height < 3 or width < 3:
@@ -80,6 +81,8 @@ class Maze():
             self.__generatePRIMS()
         elif method == self.KRUSKALS:
             self.__generateKRUSKALS()
+        elif method == self.ALDOUSBRODER:
+            self.__generateALDOUSBRODER()
         else:
             raise Exception("Wrong Method")
         self.method = method
@@ -234,6 +237,16 @@ class Maze():
                 sets.pop(set_cell_2)
             
             wall_list.remove(wall)
+
+    def __generateALDOUSBRODER(self):
+        cells = self.get_all_coords()
+        cell = Node(state=random.choice(cells), parent=None, action=None)
+        self.maze[cell] = 0
+        while len(self.maze.keys()) < self.height * self.width:
+            neighs = self.__get_neighbors(random.choice(list(self.maze.keys())))
+            if neighs:
+                n = random.choice(neighs)
+                self.maze[random.choice(neighs)] = self.get_path_length(n)
 
     def get_path_length(self, node):
         count = 0

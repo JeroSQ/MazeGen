@@ -24,11 +24,13 @@ Supported methods are:
 
 -Kruskal's Algorithm
 
+-Aldous-Broder Algorithm
+
 To select a method use this notation:
 
 ```Maze.method``` 
 
-where *method* is *DFS* or *HUNTKILL* or *ELLERS* or *PRIMS* or *KRUSKALS*
+where *method* is *DFS* or *HUNTKILL* or *ELLERS* or *PRIMS* or *KRUSKALS* or *ALDOUSBRODER*
 
 ## exporter.py functions:
 
