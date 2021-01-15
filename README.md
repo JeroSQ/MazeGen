@@ -20,11 +20,13 @@ Supported methods are:
 
 -Eller's Algorithm
 
+-Prim's Algorithm
+
 To select a method use this notation:
 
 ```your_maze_object.method``` 
 
-where *your_maze_object* is the object you created with mazegen.Maze() and *method* is *DFS* or *HUNTKILL* or *ELLERS*
+where *your_maze_object* is the object you created with mazegen.Maze() and *method* is *DFS* or *HUNTKILL* or *ELLERS* or *PRIMS*
 
 ## exporter.py functions:
 

@@ -15,9 +15,7 @@ class Stack():
         self.frontier.append(node)
 
     def remove(self):
-        node = self.frontier[-1]
-        self.frontier.remove(node)
-        return node
+        return self.frontier.pop(-1)
 
     def extend(self, nodes):
         self.frontier.extend(nodes)
@@ -30,6 +28,7 @@ class Maze():
     DFS = 0
     HUNTKILL = 1
     ELLERS = 2
+    PRIMS = 3
 
     def __init__(self, height, width, root="top-left", random=True):
       #  if height < 3 or width < 3:
@@ -76,6 +75,8 @@ class Maze():
             self.__generateDFS_HUNT(HUNT=True)
         elif method == self.ELLERS:
             self.__generateELLERS()
+        elif method == self.PRIMS:
+            self.__generatePRIMS()
         else:
             raise Exception("Wrong Method")
         self.method = method
@@ -182,6 +183,18 @@ class Maze():
                 row_sets[s1].extend(row_sets[s2])
                 row_sets[s2] = 0
                 self.maze[Node(state=(cell[0], cell[1]+1), parent=None, action="right")] = self.height - 1
+
+    def __generatePRIMS(self):
+        start = (random.randrange(0, self.height), random.randrange(0, self.width))
+        node = Node(state=start, parent=None, action=None)
+        self.maze[node] = 0
+        wall_list = self.__get_neighbors(node)
+        while wall_list:
+            wall = random.choice(wall_list)
+            if not [j for j in self.maze.keys() if j.state == wall.state]:
+                self.maze[wall] = self.get_path_length(wall)
+                wall_list.extend(self.__get_neighbors(wall))
+            wall_list.remove(wall)
 
     def get_path_length(self, node):
         count = 0
