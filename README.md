@@ -1,6 +1,8 @@
 # MazeGen
 A Python program that generates mazes using different algorithms and shows visualizations of how the mazes are created. 
+You can check out some examples in the example folder
 
+### Files
 mazegen.py contains the code that ultimately generates the maze. 
 
 exporter.py contains the code to export the generated maze as .txt, .png or .gif
