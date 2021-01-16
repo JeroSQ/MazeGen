@@ -30,11 +30,13 @@ Supported methods are:
 
 -Wilson's Algorithm
 
+-Binary Tree
+
 To select a method use this notation:
 
 ```Maze.method``` 
 
-where *method* is *DFS* or *HUNT_KILL* or *ELLERS* or *PRIMS* or *KRUSKALS* or *ALDOUS_BRODER* or *WILSONS*
+where *method* is *DFS* or *HUNT_KILL* or *ELLERS* or *PRIMS* or *KRUSKALS* or *ALDOUS_BRODER* or *WILSONS* or *BINARY_TREE*
 
 ## exporter.py functions:
 

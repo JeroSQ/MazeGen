@@ -26,19 +26,26 @@ class Stack():
 class Maze():
     
     DFS = 0
-    HUNTKILL = 1
+    HUNT_KILL = 1
     ELLERS = 2
     PRIMS = 3
     KRUSKALS = 4
-    ALDOUSBRODER = 5
+    ALDOUS_BRODER = 5
     WILSONS = 6
-    BINARYTREE = 7
+    BINARY_TREE = 7
+    GROWING_TREE = 10
     SIDEWINDER = 8
     DIVISION = 9
+    CELLULAR_AUTOMATON = 11
+
+    NORTH_EAST = ("up", "right")
+    SOUTH_EAST = ("down", "right")
+    SOUTH_WEST = ("down", "left")
+    NORTH_WEST = ("up", "left")
 
     def __init__(self, height, width, root="top-left", random=True):
-      #  if height < 3 or width < 3:
-       #     raise Exception("Maze too small")
+        if height < 3 or width < 3:
+            raise Exception("Maze too small")
         self.orig_height = height
         self.orig_width = width
         self.height = round((height + 1) / 2)
@@ -79,7 +86,7 @@ class Maze():
     def generate(self, method):
         if method == self.DFS:
             self.__generateDFS_HUNT(HUNT=False)
-        elif method == self.HUNTKILL:
+        elif method == self.HUNT_KILL:
             self.__generateDFS_HUNT(HUNT=True)
         elif method == self.ELLERS:
             self.__generateELLERS()
@@ -87,10 +94,12 @@ class Maze():
             self.__generatePRIMS()
         elif method == self.KRUSKALS:
             self.__generateKRUSKALS()
-        elif method == self.ALDOUSBRODER:
+        elif method == self.ALDOUS_BRODER:
             self.__generateALDOUSBRODER()
         elif method == self.WILSONS:
             self.__generateWILSONS()
+        elif method == self.BINARY_TREE:
+            self.__generateBINARYTREE()
         else:
             raise Exception("Wrong Method")
         self.method = method
@@ -292,6 +301,24 @@ class Maze():
                     self.maze[Node(state=n.state, parent=None, action=None)] = 0
                     continue
                 self.maze[Node(state=n.state, parent=n.parent, action=walk[i-1].action)] = 0
+
+    def __generateBINARYTREE(self, diagonal=NORTH_EAST, start=SOUTH_EAST):
+        cells = self.__get_all_coords()
+        if start == self.NORTH_EAST:
+            cells = sorted(sorted(cells, key=lambda x:x[1], reverse=True), key=lambda x:x[0])
+        elif start == self.SOUTH_EAST:
+            cells = sorted(sorted(cells, key=lambda x:x[1], reverse=True), key=lambda x:x[0], reverse=True)
+        elif start == self.SOUTH_WEST:
+            cells = sorted(sorted(cells, key=lambda x:x[1]), key=lambda x:x[0], reverse=True)
+
+        for cell in cells:
+            node = Node(cell, None, None)
+            neighs = [n for n in self.__get_neighbors(node, get_unvisited=None) if n.action == diagonal[0] or n.action == diagonal[1]]
+            self.maze[node] = 0
+            
+            if neighs:
+                r_neigh = random.choice(neighs)
+                self.maze[Node(r_neigh.state, node, r_neigh.action)] = 0
 
     def __get_path_length(self, node):
         count = 0
