@@ -31,6 +31,10 @@ class Maze():
     PRIMS = 3
     KRUSKALS = 4
     ALDOUSBRODER = 5
+    WILSONS = 6
+    BINARYTREE = 7
+    SIDEWINDER = 8
+    DIVISION = 9
 
     def __init__(self, height, width, root="top-left", random=True):
       #  if height < 3 or width < 3:
@@ -66,9 +70,11 @@ class Maze():
             ("right" if opposite_action else "left",(row, col - 1)),
             ("left" if opposite_action else "right",(row, col + 1))
         ]
-        if get_unvisited:
+        if get_unvisited == True:
             return [Node(state=n, parent=node, action=action) for action, n in neighbors if is_valid(self, n) and not [i for i in self.maze.keys() if i.state == n]]
-        return [Node(state=n, parent=node, action=action) for action, n in neighbors if is_valid(self, n) and [i for i in self.maze.keys() if i.state == n]]
+        if get_unvisited == False:
+            return [Node(state=n, parent=node, action=action) for action, n in neighbors if is_valid(self, n) and [i for i in self.maze.keys() if i.state == n]]
+        return [Node(state=n, parent=node, action=action) for action, n in neighbors if is_valid(self, n)]
 
     def generate(self, method):
         if method == self.DFS:
@@ -83,6 +89,8 @@ class Maze():
             self.__generateKRUSKALS()
         elif method == self.ALDOUSBRODER:
             self.__generateALDOUSBRODER()
+        elif method == self.WILSONS:
+            self.__generateWILSONS()
         else:
             raise Exception("Wrong Method")
         self.method = method
@@ -98,14 +106,14 @@ class Maze():
             node = visited.remove()
             if [n for n in self.maze.keys() if n.state == node.state]:
                 continue
-            self.maze[node] = self.get_path_length(node)
+            self.maze[node] = self.__get_path_length(node)
             neighbors = self.__get_neighbors(node)
             if neighbors:
                 if self.random:
                     random.shuffle(neighbors)
                 visited.extend(neighbors)
             elif HUNT:
-                for row, col in self.get_all_coords(start_row=hunt_row):
+                for row, col in self.__get_all_coords(start_row=hunt_row):
                     if not (row, col) in [n.state for n in self.maze.keys()]:
                         neighs = self.__get_neighbors(Node(state=(row, col), parent=None, action=None), get_unvisited=False, opposite_action=True)
                         if neighs:
@@ -191,14 +199,14 @@ class Maze():
                 self.maze[Node(state=(cell[0], cell[1]+1), parent=None, action="right")] = self.height - 1
 
     def __generatePRIMS(self):
-        start = (random.randrange(0, self.height), random.randrange(0, self.width))
-        node = Node(state=start, parent=None, action=None)
+        cells = self.__get_all_coords()
+        node = Node(state=random.choice(cells), parent=None, action=None)
         self.maze[node] = 0
         neigh_list = self.__get_neighbors(node)
         while neigh_list:
             neigh = random.choice(neigh_list)
             if not [j for j in self.maze.keys() if j.state == neigh.state]:
-                self.maze[neigh] = self.get_path_length(neigh)
+                self.maze[neigh] = self.__get_path_length(neigh)
                 neigh_list.extend(self.__get_neighbors(neigh))
             neigh_list.remove(neigh)
 
@@ -218,7 +226,7 @@ class Maze():
                                 Node(state=(row + 1, col), parent=None, action="down")
                         ))
         
-        sets = {i:set([cell]) for i, cell in enumerate(self.get_all_coords())}
+        sets = {i:set([cell]) for i, cell in enumerate(self.__get_all_coords())}
 
         while wall_list:
             wall = random.choice(wall_list)
@@ -239,25 +247,85 @@ class Maze():
             wall_list.remove(wall)
 
     def __generateALDOUSBRODER(self):
-        cells = self.get_all_coords()
+        cells = self.__get_all_coords()
         cell = Node(state=random.choice(cells), parent=None, action=None)
         self.maze[cell] = 0
-        while len(self.maze.keys()) < self.height * self.width:
+        while not self.__maze_full():
             neighs = self.__get_neighbors(random.choice(list(self.maze.keys())))
             if neighs:
                 n = random.choice(neighs)
-                self.maze[random.choice(neighs)] = self.get_path_length(n)
+                self.maze[random.choice(neighs)] = self.__get_path_length(n)
 
-    def get_path_length(self, node):
+    def __generateWILSONS(self):
+        cells = self.__get_all_coords()
+        cell = Node(state=random.choice(cells), parent=None, action=None)
+        self.maze[cell] = 0
+
+        while not self.__maze_full():
+            walk = []
+            walk_start = random.choice([i for i in cells if i not in [j.state for j in self.maze.keys()]])
+            walk.append(Node(state=walk_start, parent=None, action=None))
+            while not [i.state for i in self.maze.keys() if i.state == walk[-1].state]:
+                current = walk[-1]
+                neighs = self.__get_neighbors(current, get_unvisited=None)
+
+                before = [i for i in neighs if i.state == current.parent.state][0] if current.parent else None
+                if before:
+                    neighs.remove(before)
+                    
+                random_neigh = random.choice(neighs)
+                check = [j for j in walk if j.state == random_neigh.state]
+                if check:
+                    index = walk.index(check[0])
+                    walk[index] = random_neigh
+                    walk = walk[0:index + 1]
+                    walk[-1].action = None
+                else:
+                    walk.append(random_neigh)
+                    if len(walk) >= 2:
+                        walk[-2].action = walk[-1].action
+                        walk[-1].action = None
+
+
+            for i, n in enumerate(walk):
+                if i == 0:
+                    self.maze[Node(state=n.state, parent=None, action=None)] = 0
+                    continue
+                self.maze[Node(state=n.state, parent=n.parent, action=walk[i-1].action)] = 0
+
+    def __get_path_length(self, node):
         count = 0
         while node.parent:
             count += 1
             node = node.parent
         return count
 
-    def get_all_coords(self, start_row=0):
+    def __get_all_coords(self, start_row=0):
         coords = []
         for i in range(start_row, self.height):
             for j in range(self.width):
                 coords.append((i, j))
         return coords
+
+    def __maze_full(self):
+        return all(self.__state_in_maze(state) for state in self.__get_all_coords())
+
+    def __state_in_maze(self, state):
+        check = [i for i in self.maze.keys() if i.state == state]
+        return check[0] if check else None
+
+    def __get_action_coords(self, node):
+        row, col = node.state
+        action = node.action
+        action_coords = [row, col]
+
+        if action == "up":
+            action_coords[0] = row * 2 + 1
+        elif action == "down":
+            action_coords[0] = row * 2 - 1
+        elif action == "right":
+            action_coords[1] = col * 2 - 1
+        elif action == "left":
+            action_coords[1] = col * 2 + 1
+
+        return tuple(action_coords)

@@ -28,11 +28,13 @@ Supported methods are:
 
 -Aldous-Broder Algorithm
 
+-Wilson's Algorithm
+
 To select a method use this notation:
 
 ```Maze.method``` 
 
-where *method* is *DFS* or *HUNTKILL* or *ELLERS* or *PRIMS* or *KRUSKALS* or *ALDOUSBRODER*
+where *method* is *DFS* or *HUNTKILL* or *ELLERS* or *PRIMS* or *KRUSKALS* or *ALDOUSBRODER* or *WILSONS*
 
 ## exporter.py functions:
 

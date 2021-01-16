@@ -103,7 +103,7 @@ def get_color(height, width, color, path_length, maze):
         start_color[0] = 0
 
     return tuple(start_color)
-
+    
 def get_action_coords(node):
     row, col = node.state
     action = node.action
@@ -119,5 +119,4 @@ def get_action_coords(node):
         action_coords[1] = col * 2 + 1
 
     return tuple(action_coords)
-    
 
