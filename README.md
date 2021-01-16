@@ -34,7 +34,7 @@ To select a method use this notation:
 
 ```Maze.method``` 
 
-where *method* is *DFS* or *HUNTKILL* or *ELLERS* or *PRIMS* or *KRUSKALS* or *ALDOUSBRODER* or *WILSONS*
+where *method* is *DFS* or *HUNT_KILL* or *ELLERS* or *PRIMS* or *KRUSKALS* or *ALDOUS_BRODER* or *WILSONS*
 
 ## exporter.py functions:
 
