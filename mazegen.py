@@ -100,6 +100,8 @@ class Maze():
             self.__generateWILSONS()
         elif method == self.BINARY_TREE:
             self.__generateBINARYTREE()
+        elif method == self.GROWING_TREE:
+            self.__generateGROWINGTREE()
         else:
             raise Exception("Wrong Method")
         self.method = method
@@ -113,7 +115,7 @@ class Maze():
         hunt_row = 0
         while not visited.empty():
             node = visited.remove()
-            if [n for n in self.maze.keys() if n.state == node.state]:
+            if self.__state_in_maze(node.state):
                 continue
             self.maze[node] = self.__get_path_length(node)
             neighbors = self.__get_neighbors(node)
@@ -319,6 +321,20 @@ class Maze():
             if neighs:
                 r_neigh = random.choice(neighs)
                 self.maze[Node(r_neigh.state, node, r_neigh.action)] = 0
+
+    def __generateGROWINGTREE(self, backtrack_prob=0.5):
+        visited = []
+        node = Node(random.choice(self.__get_all_coords()), None, None)
+        visited.append(node)
+        while visited:
+            node = visited.pop(random.choices([-1, visited.index(random.choice(visited))], [backtrack_prob, 1 - backtrack_prob])[0])
+            if self.__state_in_maze(node.state):
+                continue
+            self.maze[node] = self.__get_path_length(node)
+            neighs = self.__get_neighbors(node)
+            if neighs:
+                random.shuffle(neighs)
+                visited.extend(neighs)
 
     def __get_path_length(self, node):
         count = 0
