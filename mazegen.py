@@ -33,10 +33,9 @@ class Maze():
     ALDOUS_BRODER = 5
     WILSONS = 6
     BINARY_TREE = 7
-    GROWING_TREE = 10
-    SIDEWINDER = 8
-    DIVISION = 9
-    CELLULAR_AUTOMATON = 11
+    GROWING_TREE = 8
+    SIDEWINDER = 9
+    DIVISION = 10
 
     NORTH_EAST = ("up", "right")
     SOUTH_EAST = ("down", "right")
@@ -64,6 +63,11 @@ class Maze():
             start[0] = int(self.height / 2)
             start[1] = int(self.width / 2)
         self.start = start
+        self.grid = [
+            [True for _ in range(self.width * 2 - 1)]
+            for _ in range(self.height * 2 - 1)
+        ]
+        self.walls = []
         
     def __get_neighbors(self, node, get_unvisited=True, opposite_action=False):
         def is_valid(self, node):
@@ -102,10 +106,14 @@ class Maze():
             self.__generateBINARYTREE()
         elif method == self.GROWING_TREE:
             self.__generateGROWINGTREE()
+        elif method == self.SIDEWINDER:
+            self.__generateSIDEWINDER()
+        elif method == self.DIVISION:
+            self.__generateDIVISION((0, 0), self.height * 2 - 1, self.width * 2 - 1)
         else:
             raise Exception("Wrong Method")
         self.method = method
-        self.longest_path = max(l for l in self.maze.values())
+        self.longest_path = 0#max(l for l in self.maze.values())
         if method != self.ELLERS and method != self.KRUSKALS:
             print(f"Furthest away cell from root is {self.longest_path} cells away")
     
@@ -335,6 +343,63 @@ class Maze():
             if neighs:
                 random.shuffle(neighs)
                 visited.extend(neighs)
+
+    def __generateSIDEWINDER(self):
+        for row in range(self.height):
+            run_set = []
+            for col in range(self.width):
+                node = Node((row, col), None, None)
+                neigh = [n for n in self.__get_neighbors(node) if n.action == "right"]
+                self.maze[node] = 0
+                
+                if row == 0 and neigh:
+                    self.maze[neigh[0]] = 0 
+                    continue
+
+                run_set.append(node)
+
+                if not neigh or random.random() < 0.5:
+                    random_to_north = random.choice(run_set)
+                    coords = random_to_north.state
+                    self.maze[Node((coords[0] - 1, coords[1]), random_to_north, "up")] = 0
+                    run_set = []
+
+                else:
+                    self.maze[neigh[0]] = 0 
+    
+    def __generateDIVISION(self, start, height, width):
+        if width <= 2 or height <= 2:
+            return
+
+        if width < height:
+            horizontal = True
+        elif width > height:
+            horizontal = False
+        else:
+            horizontal = True if random.random() < 0.5 else False
+        if horizontal:
+            row = random.choice([i for i in range(start[0], start[0] + height) if i % 2 != 0])
+            walls = [(row, i) for i in range(start[1], start[1] + width)]
+            for row, col in walls:
+                self.grid[row][col] = False
+                self.walls.append((row, col))
+            passage = random.choice([i for i in walls if i[1] % 2 == 0])
+            self.grid[passage[0]][passage[1]] = True
+            self.walls.append((passage[0], passage[1]))
+            self.__generateDIVISION(start, row - start[0], width)
+            self.__generateDIVISION((row + 1, start[1]), height - row + start[0] - 1, width)
+        else:
+            col = random.choice([i for i in range(start[1], start[1] + width) if i % 2 != 0])
+            walls = [(i, col) for i in range(start[0], start[0] + height)]
+            for row, col in walls:
+                self.grid[row][col] = False
+                self.walls.append((row, col))
+            passage = random.choice([i for i in walls if i[0] % 2 == 0])
+            self.grid[passage[0]][passage[1]] = True
+            self.walls.append((passage[0], passage[1]))
+            self.__generateDIVISION(start, height, col - start[1])
+            self.__generateDIVISION((start[0], col + 1), height, width - col + start[1] - 1)
+
 
     def __get_path_length(self, node):
         count = 0

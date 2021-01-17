@@ -1,5 +1,5 @@
 # MazeGen
-A Python program that generates mazes using different algorithms and shows visualizations of how the mazes are created. 
+A Python program that generates perfect mazes using different algorithms and shows visualizations of how the mazes are created. 
 You can check out some examples in the example folder
 
 ### Files
@@ -20,23 +20,29 @@ Supported methods are:
 
 -Hunt and Kill
 
--Eller's Algorithm
+-Eller's 
 
--Prim's Algorithm
+-Prim's 
 
--Kruskal's Algorithm
+-Kruskal's 
 
--Aldous-Broder Algorithm
+-Aldous-Broder 
 
--Wilson's Algorithm
+-Wilson's 
 
 -Binary Tree
+
+-Growing Tree
+
+-Sidewinder
+
+-Recursive Division
 
 To select a method use this notation:
 
 ```Maze.method``` 
 
-where *method* is *DFS* or *HUNT_KILL* or *ELLERS* or *PRIMS* or *KRUSKALS* or *ALDOUS_BRODER* or *WILSONS* or *BINARY_TREE*
+where *method* is *DFS* or *HUNT_KILL* or *ELLERS* or *PRIMS* or *KRUSKALS* or *ALDOUS_BRODER* or *WILSONS* or *BINARY_TREE* or *GROWING_TREE* or *SIDEWINDER* or *DIVISION*
 
 ## exporter.py functions:
 
