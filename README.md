@@ -1,6 +1,6 @@
 # MazeGen
 A Python program that generates perfect mazes using different algorithms and shows visualizations of how the mazes are created. 
-You can check out some examples in the example folder
+You can check out some examples in the example folder called mazegen_algorithms
 
 ### Files
 mazegen.py contains the code that ultimately generates the maze. 
